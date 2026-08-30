@@ -1,17 +1,21 @@
-import 'package:flutter/material.dart';
+// 📁 lib/core/constants/app_constants.dart
+// PURPOSE: Plain app-wide values. Colors live in app_colors.dart only.
 
 class AppConstants {
   AppConstants._();
-  static const String currencySymbol = 'YER';
-  static const int maxNameLength = 50;
-  static const int maxNoteLength = 500;
-}
 
-class AppColors {
-  AppColors._();
-  static const Color primary = Color(0xFF2E7D32);
-  static const Color primaryDark = Color(0xFF1B5E20);
-  static const Color credit = Color(0xFF2E7D32);
-  static const Color debit = Color(0xFFD32F2F);
-  static const Color settled = Color(0xFF757575);
+  /// Currency code shown next to every amount.
+  static const String currencySymbol = 'YER';
+
+  static const int maxNameLength = 50;
+  static const int maxPhoneLength = 20;
+  static const int maxNoteLength = 500;
+
+  /// How many people the home screen previews before "See all".
+  static const int homePreviewCount = 5;
+
+  // Shared spacing / shape values so screens stay visually consistent.
+  static const double screenPadding = 20;
+  static const double cardRadius = 20;
+  static const double fieldRadius = 14;
 }

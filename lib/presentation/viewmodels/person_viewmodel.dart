@@ -1,5 +1,5 @@
 // 📁 lib/presentation/viewmodels/person_viewmodel.dart
-// PURPOSE: Person actions (mutations)
+// PURPOSE: Person actions (writes). Reads live in the providers.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/core_providers.dart';
@@ -16,13 +16,24 @@ class PersonActions {
     required String name,
     String? phone,
     String? notes,
-  }) async {
-    final repo = _ref.read(debtRepositoryProvider);
-    await repo.insertPerson(name: name, phone: phone, notes: notes);
+  }) {
+    return _ref
+        .read(debtRepositoryProvider)
+        .insertPerson(name: name, phone: phone, notes: notes);
   }
 
-  Future<void> deletePerson(int id) async {
-    final repo = _ref.read(debtRepositoryProvider);
-    await repo.deletePerson(id);
+  Future<void> updatePerson({
+    required int id,
+    required String name,
+    String? phone,
+    String? notes,
+  }) {
+    return _ref
+        .read(debtRepositoryProvider)
+        .updatePerson(id: id, name: name, phone: phone, notes: notes);
+  }
+
+  Future<void> deletePerson(int id) {
+    return _ref.read(debtRepositoryProvider).deletePerson(id);
   }
 }

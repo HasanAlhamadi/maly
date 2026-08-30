@@ -1,25 +1,27 @@
-// PURPOSE: Theme mode state management
+// 📁 lib/core/theme/theme_provider.dart
+// PURPOSE: Theme mode state, persisted between launches.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../settings/settings_service.dart';
 
-final themeModeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((
-  ref,
-) {
-  return ThemeNotifier();
+final themeModeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
+  return ThemeNotifier(ref.watch(settingsServiceProvider));
 });
 
 class ThemeNotifier extends StateNotifier<ThemeMode> {
-  ThemeNotifier() : super(ThemeMode.system);
+  final SettingsService _settings;
 
-  void setLight() => state = ThemeMode.light;
-  void setDark() => state = ThemeMode.dark;
-  void setSystem() => state = ThemeMode.system;
+  // Start from whatever was saved last time.
+  ThemeNotifier(this._settings) : super(_settings.loadThemeMode());
+
+  void setThemeMode(ThemeMode mode) {
+    state = mode;
+    _settings.saveThemeMode(mode);
+  }
+
+  /// Quick light <-> dark flip. From "system" it goes to dark.
   void toggle() {
-    state = switch (state) {
-      ThemeMode.light => ThemeMode.dark,
-      ThemeMode.dark => ThemeMode.light,
-      ThemeMode.system => ThemeMode.light,
-    };
+    setThemeMode(state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
   }
 }

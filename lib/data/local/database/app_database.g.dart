@@ -391,16 +391,16 @@ class $DebtTransactionsTable extends DebtTransactions
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<int> type = GeneratedColumn<int>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
+  late final GeneratedColumnWithTypeConverter<TransactionType, int> type =
+      GeneratedColumn<int>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<TransactionType>($DebtTransactionsTable.$convertertype);
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
   );
@@ -476,12 +476,6 @@ class $DebtTransactionsTable extends DebtTransactions
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    }
     if (data.containsKey('description')) {
       context.handle(
         _descriptionMeta,
@@ -524,10 +518,12 @@ class $DebtTransactionsTable extends DebtTransactions
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}type'],
-      )!,
+      type: $DebtTransactionsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -547,13 +543,16 @@ class $DebtTransactionsTable extends DebtTransactions
   $DebtTransactionsTable createAlias(String alias) {
     return $DebtTransactionsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<TransactionType, int, int> $convertertype =
+      const EnumIndexConverter<TransactionType>(TransactionType.values);
 }
 
 class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
   final int id;
   final int personId;
   final double amount;
-  final int type;
+  final TransactionType type;
   final String? description;
   final DateTime date;
   final DateTime createdAt;
@@ -572,7 +571,11 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
     map['id'] = Variable<int>(id);
     map['person_id'] = Variable<int>(personId);
     map['amount'] = Variable<double>(amount);
-    map['type'] = Variable<int>(type);
+    {
+      map['type'] = Variable<int>(
+        $DebtTransactionsTable.$convertertype.toSql(type),
+      );
+    }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
@@ -604,7 +607,9 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
       id: serializer.fromJson<int>(json['id']),
       personId: serializer.fromJson<int>(json['personId']),
       amount: serializer.fromJson<double>(json['amount']),
-      type: serializer.fromJson<int>(json['type']),
+      type: $DebtTransactionsTable.$convertertype.fromJson(
+        serializer.fromJson<int>(json['type']),
+      ),
       description: serializer.fromJson<String?>(json['description']),
       date: serializer.fromJson<DateTime>(json['date']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -617,7 +622,9 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
       'id': serializer.toJson<int>(id),
       'personId': serializer.toJson<int>(personId),
       'amount': serializer.toJson<double>(amount),
-      'type': serializer.toJson<int>(type),
+      'type': serializer.toJson<int>(
+        $DebtTransactionsTable.$convertertype.toJson(type),
+      ),
       'description': serializer.toJson<String?>(description),
       'date': serializer.toJson<DateTime>(date),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -628,7 +635,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
     int? id,
     int? personId,
     double? amount,
-    int? type,
+    TransactionType? type,
     Value<String?> description = const Value.absent(),
     DateTime? date,
     DateTime? createdAt,
@@ -689,7 +696,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
   final Value<int> id;
   final Value<int> personId;
   final Value<double> amount;
-  final Value<int> type;
+  final Value<TransactionType> type;
   final Value<String?> description;
   final Value<DateTime> date;
   final Value<DateTime> createdAt;
@@ -736,7 +743,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     Value<int>? id,
     Value<int>? personId,
     Value<double>? amount,
-    Value<int>? type,
+    Value<TransactionType>? type,
     Value<String?>? description,
     Value<DateTime>? date,
     Value<DateTime>? createdAt,
@@ -765,7 +772,9 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
       map['amount'] = Variable<double>(amount.value);
     }
     if (type.present) {
-      map['type'] = Variable<int>(type.value);
+      map['type'] = Variable<int>(
+        $DebtTransactionsTable.$convertertype.toSql(type.value),
+      );
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
@@ -1127,7 +1136,7 @@ typedef $$DebtTransactionsTableCreateCompanionBuilder =
       Value<int> id,
       required int personId,
       required double amount,
-      Value<int> type,
+      Value<TransactionType> type,
       Value<String?> description,
       Value<DateTime> date,
       Value<DateTime> createdAt,
@@ -1137,7 +1146,7 @@ typedef $$DebtTransactionsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> personId,
       Value<double> amount,
-      Value<int> type,
+      Value<TransactionType> type,
       Value<String?> description,
       Value<DateTime> date,
       Value<DateTime> createdAt,
@@ -1191,9 +1200,10 @@ class $$DebtTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get type => $composableBuilder(
+  ColumnWithTypeConverterFilters<TransactionType, TransactionType, int>
+  get type => $composableBuilder(
     column: $table.type,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get description => $composableBuilder(
@@ -1313,7 +1323,7 @@ class $$DebtTransactionsTableAnnotationComposer
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
-  GeneratedColumn<int> get type =>
+  GeneratedColumnWithTypeConverter<TransactionType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
@@ -1384,7 +1394,7 @@ class $$DebtTransactionsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> personId = const Value.absent(),
                 Value<double> amount = const Value.absent(),
-                Value<int> type = const Value.absent(),
+                Value<TransactionType> type = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -1402,7 +1412,7 @@ class $$DebtTransactionsTableTableManager
                 Value<int> id = const Value.absent(),
                 required int personId,
                 required double amount,
-                Value<int> type = const Value.absent(),
+                Value<TransactionType> type = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),

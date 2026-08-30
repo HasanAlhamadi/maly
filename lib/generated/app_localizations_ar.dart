@@ -33,13 +33,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get save => 'حفظ';
 
   @override
+  String get saving => 'جارٍ الحفظ...';
+
+  @override
   String get cancel => 'إلغاء';
 
   @override
   String get delete => 'حذف';
 
   @override
-  String get confirm => 'تأكيد';
+  String get undo => 'تراجع';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get seeAll => 'عرض الكل';
 
   @override
   String get amount => 'المبلغ';
@@ -54,22 +63,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionType => 'نوع المعاملة';
 
   @override
-  String get credit => 'لـي (دائن)';
+  String get credit => 'لي';
 
   @override
-  String get debit => 'علىـي (مدين)';
+  String get debit => 'عليّ';
 
   @override
-  String get creditDesc => 'ليستحق لي';
+  String get creditDesc => 'يستحق لي';
 
   @override
-  String get debitDesc => 'أستحق علي';
+  String get debitDesc => 'أنا مدين له';
 
   @override
-  String get totalOwedToYou => 'إجمالي مستحق لك';
+  String get totalOwedToYou => 'مستحق لك';
 
   @override
-  String get totalYouOwe => 'إجمالي مستحق عليك';
+  String get totalYouOwe => 'مستحق عليك';
 
   @override
   String get netBalance => 'الرصيد الصافي';
@@ -78,16 +87,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owesYou => 'يستحق لك';
 
   @override
-  String get youOwe => 'أنت تستحق على';
+  String get youOwe => 'أنت مدين بـ';
 
   @override
-  String get settled => 'تسوية';
+  String get settled => 'مُسوّى';
+
+  @override
+  String get allSettled => 'لا توجد ديون';
 
   @override
   String get noPersons => 'لا يوجد أشخاص';
 
   @override
-  String get noPersonsSubtitle => 'اضغط + لإضافة شخص';
+  String get noPersonsSubtitle => 'أضف شخصاً لبدء تتبع الديون';
 
   @override
   String get noTransactions => 'لا توجد معاملات';
@@ -99,10 +111,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deletePersonTitle => 'حذف الشخص؟';
 
   @override
-  String get deletePersonMessage => 'سيتم حذف جميع المعاملات أيضاً.';
-
-  @override
-  String get deleteTransactionTitle => 'حذف المعاملة؟';
+  String get deletePersonMessage => 'سيتم حذف جميع معاملاته أيضاً.';
 
   @override
   String get currency => 'ريال';
@@ -111,13 +120,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addTransaction => 'إضافة معاملة';
 
   @override
-  String get transactions => 'المعاملات';
-
-  @override
   String get settings => 'الإعدادات';
 
   @override
-  String get theme => 'المظهر';
+  String get appearance => 'المظهر';
 
   @override
   String get light => 'فاتح';
@@ -138,7 +144,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get arabic => 'العربية';
 
   @override
-  String get search => 'بحث';
+  String get searchPeople => 'ابحث عن شخص';
+
+  @override
+  String get noSearchResults => 'لا توجد نتائج مطابقة';
 
   @override
   String get balance => 'الرصيد';
@@ -147,11 +156,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionHistory => 'سجل المعاملات';
 
   @override
-  String get newPerson => 'شخص جديد';
-
-  @override
   String get nameRequired => 'الاسم مطلوب';
 
   @override
+  String get nameTooLong => 'الاسم طويل جداً';
+
+  @override
+  String get amountRequired => 'المبلغ مطلوب';
+
+  @override
   String get invalidAmount => 'أدخل مبلغاً صحيحاً';
+
+  @override
+  String get personAdded => 'تمت إضافة الشخص';
+
+  @override
+  String get personUpdated => 'تم تحديث الشخص';
+
+  @override
+  String get personDeleted => 'تم حذف الشخص';
+
+  @override
+  String get transactionAdded => 'تمت إضافة المعاملة';
+
+  @override
+  String get transactionDeleted => 'تم حذف المعاملة';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String get somethingWentWrong => 'حدث خطأ ما';
+
+  @override
+  String get overview => 'نظرة عامة';
+
+  @override
+  String get youAreOwed => 'لك';
+
+  @override
+  String get youOweOthers => 'عليك';
 }

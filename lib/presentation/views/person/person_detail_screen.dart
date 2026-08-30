@@ -1,12 +1,12 @@
 // 📁 lib/presentation/views/person/person_detail_screen.dart
+// PURPOSE: One person's balance and their full transaction history.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../../core/utils/date_formatter.dart';
-import '../../../domain/entities/transaction.dart';
 import '../../../generated/app_localizations.dart';
 import '../../providers/balance_providers.dart';
 import '../../providers/person_providers.dart';
@@ -14,6 +14,9 @@ import '../../providers/transaction_providers.dart';
 import '../../viewmodels/person_viewmodel.dart';
 import '../../viewmodels/transaction_viewmodel.dart';
 import '../../widgets/balance_card.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_view.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/transaction_tile.dart';
 
 class PersonDetailScreen extends ConsumerWidget {
@@ -24,121 +27,119 @@ class PersonDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final personAsync = ref.watch(personByIdProvider(personId));
+    final person = ref.watch(personByIdProvider(personId)).valueOrNull;
+    final balance = ref.watch(personBalanceProvider(personId)).valueOrNull ?? 0;
     final transactionsAsync = ref.watch(
       personTransactionsStreamProvider(personId),
     );
-    final balanceAsync = ref.watch(personBalanceProvider(personId));
-    final transactionActions = ref.read(transactionActionsProvider);
-    final personActions = ref.read(personActionsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: personAsync.when(
-          data: (p) => Text(p?.name ?? l10n.persons),
-          loading: () => const Text('...'),
-          error: (_, __) => Text(l10n.persons),
-        ),
+        title: Text(person?.name ?? l10n.persons),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () =>
-                _confirmDeletePerson(context, ref, personActions, l10n),
+            tooltip: l10n.editPerson,
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => context.push('/edit-person/$personId'),
           ),
+          IconButton(
+            tooltip: l10n.delete,
+            icon: const Icon(Icons.delete_outline_rounded),
+            onPressed: () => _confirmDeletePerson(context, ref, l10n),
+          ),
+          const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          // Balance Card
-          balanceAsync.when(
-            data: (balance) =>
-                BalanceCard(balance: balance, title: l10n.balance),
-            loading: () => const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-
-          const Divider(),
-
-          // Transactions Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                l10n.transactionHistory,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppConstants.screenPadding,
+                4,
+                AppConstants.screenPadding,
+                0,
+              ),
+              child: Column(
+                children: [
+                  BalanceCard(balance: balance, title: l10n.balance),
+                  // Contact details are only shown when they exist.
+                  if (person?.phone != null && person!.phone!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _InfoRow(
+                      icon: Icons.phone_outlined,
+                      text: person.phone!,
+                    ),
+                  ],
+                  if (person?.notes != null && person!.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _InfoRow(icon: Icons.notes_rounded, text: person.notes!),
+                  ],
+                  const SizedBox(height: 24),
+                  SectionHeader(title: l10n.transactionHistory),
+                  const SizedBox(height: 8),
+                ],
               ),
             ),
           ),
 
-          // Transactions List
-          Expanded(
-            child: transactionsAsync.when(
-              data: (transactions) {
-                if (transactions.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.receipt_long,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.noTransactions,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Text(
-                          l10n.noTransactionsSubtitle,
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+          transactionsAsync.when(
+            data: (transactions) {
+              if (transactions.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    title: l10n.noTransactions,
+                    subtitle: l10n.noTransactionsSubtitle,
+                  ),
+                );
+              }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppConstants.screenPadding,
+                  0,
+                  AppConstants.screenPadding,
+                  96,
+                ),
+                sliver: SliverList.separated(
                   itemCount: transactions.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
-                    final t = transactions[index];
+                    final transaction = transactions[index];
                     return Slidable(
-                      key: ValueKey(t.id),
+                      key: ValueKey(transaction.id),
                       endActionPane: ActionPane(
                         motion: const ScrollMotion(),
+                        extentRatio: 0.28,
                         children: [
                           SlidableAction(
                             onPressed: (_) =>
-                                transactionActions.deleteTransaction(t.id),
-                            backgroundColor: Colors.red,
+                                _deleteTransaction(context, ref, transaction.id),
+                            backgroundColor: AppColors.debit,
                             foregroundColor: Colors.white,
-                            icon: Icons.delete,
+                            icon: Icons.delete_outline_rounded,
                             label: l10n.delete,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.cardRadius,
+                            ),
                           ),
                         ],
                       ),
-                      child: TransactionTile(
-                        transaction: t,
-                        onDelete: () =>
-                            transactionActions.deleteTransaction(t.id),
-                      ),
+                      child: TransactionTile(transaction: transaction),
                     );
                   },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+                ),
+              );
+            },
+            loading: () => const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (_, _) => const SliverFillRemaining(
+              hasScrollBody: false,
+              child: ErrorView(),
             ),
           ),
         ],
@@ -151,28 +152,65 @@ class PersonDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// Deletes a transaction and offers an Undo for a few seconds.
+  Future<void> _deleteTransaction(
+    BuildContext context,
+    WidgetRef ref,
+    int transactionId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final actions = ref.read(transactionActionsProvider);
+
+    try {
+      final deleted = await actions.deleteTransaction(transactionId);
+      if (deleted == null) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactionDeleted),
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => actions.restoreTransaction(deleted),
+          ),
+        ),
+      );
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
+    }
+  }
+
   void _confirmDeletePerson(
     BuildContext context,
     WidgetRef ref,
-    PersonActions actions,
     AppLocalizations l10n,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.deletePersonTitle),
         content: Text(l10n.deletePersonMessage),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
-              await actions.deletePerson(personId);
-              if (context.mounted) {
-                context.pop(); // close dialog
-                context.pop(); // go back
+              final messenger = ScaffoldMessenger.of(context);
+              final router = GoRouter.of(context);
+              Navigator.pop(dialogContext);
+
+              try {
+                await ref.read(personActionsProvider).deletePerson(personId);
+                if (router.canPop()) router.pop();
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.personDeleted)),
+                );
+              } catch (_) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.somethingWentWrong)),
+                );
               }
             },
             child: Text(
@@ -182,6 +220,27 @@ class PersonDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Small phone / notes line under the balance card.
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _InfoRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: theme.textTheme.bodySmall?.color),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
+      ],
     );
   }
 }

@@ -6,10 +6,12 @@ import '../../data/local/database/app_database.dart';
 import '../../data/repositories/debt_repository.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
-  return AppDatabase();
+  final db = AppDatabase();
+  // Close the connection if this provider is ever disposed (e.g. in tests).
+  ref.onDispose(db.close);
+  return db;
 });
 
 final debtRepositoryProvider = Provider<DebtRepository>((ref) {
-  final db = ref.watch(databaseProvider);
-  return DebtRepository(db);
+  return DebtRepository(ref.watch(databaseProvider));
 });

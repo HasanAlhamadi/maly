@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'DebtTracker'**
+  /// **'Maly'**
   String get appName;
 
   /// No description provided for @persons.
@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get save;
 
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
@@ -158,11 +164,23 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
-  /// No description provided for @confirm.
+  /// No description provided for @undo.
   ///
   /// In en, this message translates to:
-  /// **'Confirm'**
-  String get confirm;
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
 
   /// No description provided for @amount.
   ///
@@ -215,13 +233,13 @@ abstract class AppLocalizations {
   /// No description provided for @totalOwedToYou.
   ///
   /// In en, this message translates to:
-  /// **'Total Owed to You'**
+  /// **'Owed to you'**
   String get totalOwedToYou;
 
   /// No description provided for @totalYouOwe.
   ///
   /// In en, this message translates to:
-  /// **'Total You Owe'**
+  /// **'You owe'**
   String get totalYouOwe;
 
   /// No description provided for @netBalance.
@@ -233,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @owesYou.
   ///
   /// In en, this message translates to:
-  /// **'owes you'**
+  /// **'Owes you'**
   String get owesYou;
 
   /// No description provided for @youOwe.
@@ -248,16 +266,22 @@ abstract class AppLocalizations {
   /// **'Settled'**
   String get settled;
 
+  /// No description provided for @allSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All settled up'**
+  String get allSettled;
+
   /// No description provided for @noPersons.
   ///
   /// In en, this message translates to:
-  /// **'No people added yet'**
+  /// **'No people yet'**
   String get noPersons;
 
   /// No description provided for @noPersonsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tap + to add someone'**
+  /// **'Add someone to start tracking debts'**
   String get noPersonsSubtitle;
 
   /// No description provided for @noTransactions.
@@ -281,14 +305,8 @@ abstract class AppLocalizations {
   /// No description provided for @deletePersonMessage.
   ///
   /// In en, this message translates to:
-  /// **'This will delete all transactions too.'**
+  /// **'This will delete all their transactions too.'**
   String get deletePersonMessage;
-
-  /// No description provided for @deleteTransactionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Transaction?'**
-  String get deleteTransactionTitle;
 
   /// No description provided for @currency.
   ///
@@ -302,23 +320,17 @@ abstract class AppLocalizations {
   /// **'Add Transaction'**
   String get addTransaction;
 
-  /// No description provided for @transactions.
-  ///
-  /// In en, this message translates to:
-  /// **'Transactions'**
-  String get transactions;
-
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @theme.
+  /// No description provided for @appearance.
   ///
   /// In en, this message translates to:
-  /// **'Theme'**
-  String get theme;
+  /// **'Appearance'**
+  String get appearance;
 
   /// No description provided for @light.
   ///
@@ -356,11 +368,17 @@ abstract class AppLocalizations {
   /// **'Arabic'**
   String get arabic;
 
-  /// No description provided for @search.
+  /// No description provided for @searchPeople.
   ///
   /// In en, this message translates to:
-  /// **'Search'**
-  String get search;
+  /// **'Search people'**
+  String get searchPeople;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No people match your search'**
+  String get noSearchResults;
 
   /// No description provided for @balance.
   ///
@@ -374,23 +392,95 @@ abstract class AppLocalizations {
   /// **'Transaction History'**
   String get transactionHistory;
 
-  /// No description provided for @newPerson.
-  ///
-  /// In en, this message translates to:
-  /// **'New Person'**
-  String get newPerson;
-
   /// No description provided for @nameRequired.
   ///
   /// In en, this message translates to:
   /// **'Name is required'**
   String get nameRequired;
 
+  /// No description provided for @nameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is too long'**
+  String get nameTooLong;
+
+  /// No description provided for @amountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount is required'**
+  String get amountRequired;
+
   /// No description provided for @invalidAmount.
   ///
   /// In en, this message translates to:
   /// **'Enter a valid amount'**
   String get invalidAmount;
+
+  /// No description provided for @personAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Person added'**
+  String get personAdded;
+
+  /// No description provided for @personUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Person updated'**
+  String get personUpdated;
+
+  /// No description provided for @personDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Person deleted'**
+  String get personDeleted;
+
+  /// No description provided for @transactionAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction added'**
+  String get transactionAdded;
+
+  /// No description provided for @transactionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted'**
+  String get transactionDeleted;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @youAreOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are owed'**
+  String get youAreOwed;
+
+  /// No description provided for @youOweOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe others'**
+  String get youOweOthers;
 }
 
 class _AppLocalizationsDelegate

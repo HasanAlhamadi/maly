@@ -1,20 +1,37 @@
 // 📁 lib/main.dart
-// PURPOSE: App entry point with Riverpod + Localization + Theme
+// PURPOSE: App entry point — loads saved settings, then starts the app.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/locale/locale_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/settings/settings_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'generated/app_localizations.dart';
 import 'services/notification_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService().init();
-  runApp(const ProviderScope(child: MalyApp()));
+
+  // Settings must be ready before the first frame, otherwise the app would
+  // flash the default theme before switching to the saved one.
+  final prefs = await SharedPreferences.getInstance();
+
+  // Notifications are optional — set them up in the background so a failure
+  // here can never stop the app from starting.
+  NotificationService().init().catchError((Object _) {});
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        settingsServiceProvider.overrideWithValue(SettingsService(prefs)),
+      ],
+      child: const MalyApp(),
+    ),
+  );
 }
 
 class MalyApp extends ConsumerWidget {
@@ -26,7 +43,8 @@ class MalyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
-      title: 'DebtTracker',
+      // Localised, so the task switcher shows the right name in Arabic.
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
       debugShowCheckedModeBanner: false,
 
       // Theme
@@ -34,7 +52,9 @@ class MalyApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
 
-      // Localization
+      // Localization. A null locale means "follow the device language".
+      // MaterialApp derives text direction (RTL for Arabic) from this on its
+      // own, so no manual Directionality wrapper is needed.
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -42,17 +62,7 @@ class MalyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en'), Locale('ar')],
-
-      // RTL Support
-      builder: (context, child) {
-        return Directionality(
-          textDirection: locale.languageCode == 'ar'
-              ? TextDirection.rtl
-              : TextDirection.ltr,
-          child: child!,
-        );
-      },
+      supportedLocales: AppLocalizations.supportedLocales,
 
       // Routing
       routerConfig: appRouter,

@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'DebtTracker';
+  String get appName => 'Maly';
 
   @override
   String get persons => 'People';
@@ -33,13 +33,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get saving => 'Saving...';
+
+  @override
   String get cancel => 'Cancel';
 
   @override
   String get delete => 'Delete';
 
   @override
-  String get confirm => 'Confirm';
+  String get undo => 'Undo';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get seeAll => 'See all';
 
   @override
   String get amount => 'Amount';
@@ -66,16 +75,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debitDesc => 'I owe them';
 
   @override
-  String get totalOwedToYou => 'Total Owed to You';
+  String get totalOwedToYou => 'Owed to you';
 
   @override
-  String get totalYouOwe => 'Total You Owe';
+  String get totalYouOwe => 'You owe';
 
   @override
   String get netBalance => 'Net Balance';
 
   @override
-  String get owesYou => 'owes you';
+  String get owesYou => 'Owes you';
 
   @override
   String get youOwe => 'You owe';
@@ -84,10 +93,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settled => 'Settled';
 
   @override
-  String get noPersons => 'No people added yet';
+  String get allSettled => 'All settled up';
 
   @override
-  String get noPersonsSubtitle => 'Tap + to add someone';
+  String get noPersons => 'No people yet';
+
+  @override
+  String get noPersonsSubtitle => 'Add someone to start tracking debts';
 
   @override
   String get noTransactions => 'No transactions yet';
@@ -99,10 +111,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletePersonTitle => 'Delete Person?';
 
   @override
-  String get deletePersonMessage => 'This will delete all transactions too.';
-
-  @override
-  String get deleteTransactionTitle => 'Delete Transaction?';
+  String get deletePersonMessage =>
+      'This will delete all their transactions too.';
 
   @override
   String get currency => 'YER';
@@ -111,13 +121,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTransaction => 'Add Transaction';
 
   @override
-  String get transactions => 'Transactions';
-
-  @override
   String get settings => 'Settings';
 
   @override
-  String get theme => 'Theme';
+  String get appearance => 'Appearance';
 
   @override
   String get light => 'Light';
@@ -138,7 +145,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get arabic => 'Arabic';
 
   @override
-  String get search => 'Search';
+  String get searchPeople => 'Search people';
+
+  @override
+  String get noSearchResults => 'No people match your search';
 
   @override
   String get balance => 'Balance';
@@ -147,11 +157,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionHistory => 'Transaction History';
 
   @override
-  String get newPerson => 'New Person';
-
-  @override
   String get nameRequired => 'Name is required';
 
   @override
+  String get nameTooLong => 'Name is too long';
+
+  @override
+  String get amountRequired => 'Amount is required';
+
+  @override
   String get invalidAmount => 'Enter a valid amount';
+
+  @override
+  String get personAdded => 'Person added';
+
+  @override
+  String get personUpdated => 'Person updated';
+
+  @override
+  String get personDeleted => 'Person deleted';
+
+  @override
+  String get transactionAdded => 'Transaction added';
+
+  @override
+  String get transactionDeleted => 'Transaction deleted';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get youAreOwed => 'You are owed';
+
+  @override
+  String get youOweOthers => 'You owe others';
 }

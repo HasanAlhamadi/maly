@@ -1,10 +1,11 @@
 // 📁 lib/data/local/database/tables.dart
 import 'package:drift/drift.dart';
+import '../../../domain/entities/transaction.dart';
 
 /// Persons Table
 class Persons extends Table {
   @override
-  String get tableName => 'persons'; // ← was DatabaseConstants.personsTable
+  String get tableName => 'persons';
 
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 50)();
@@ -16,13 +17,20 @@ class Persons extends Table {
 /// Transactions Table
 class DebtTransactions extends Table {
   @override
-  String get tableName => 'transactions'; // ← was DatabaseConstants.transactionsTable
+  String get tableName => 'transactions';
 
   IntColumn get id => integer().autoIncrement()();
   IntColumn get personId =>
       integer().references(Persons, #id, onDelete: KeyAction.cascade)();
+  // Amount must always be positive; direction is carried by `type` instead.
+  // ignore: recursive_getters
   RealColumn get amount => real().check(amount.isBiggerThanValue(0))();
-  IntColumn get type => integer().withDefault(const Constant(0))();
+
+  // Stored as the enum index (debit = 0, credit = 1), so the app never has to
+  // compare raw magic numbers.
+  IntColumn get type =>
+      intEnum<TransactionType>().withDefault(const Constant(0))();
+
   TextColumn get description => text().nullable().withLength(max: 500)();
   DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

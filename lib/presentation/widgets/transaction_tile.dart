@@ -1,77 +1,88 @@
 // 📁 lib/presentation/widgets/transaction_tile.dart
+// PURPOSE: One row in a person's transaction history.
+
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/currency_formatter.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../data/local/database/app_database.dart';
+// Provides the .isCredit / .signedAmount helpers on TransactionType.
 import '../../domain/entities/transaction.dart';
+import '../../generated/app_localizations.dart';
+import 'money_text.dart';
 
 class TransactionTile extends StatelessWidget {
   final DebtTransaction transaction;
-  final VoidCallback? onDelete;
 
-  const TransactionTile({super.key, required this.transaction, this.onDelete});
+  const TransactionTile({super.key, required this.transaction});
 
   @override
   Widget build(BuildContext context) {
-    final type = transaction.type == 1
-        ? TransactionType.credit
-        : TransactionType.debit;
-    final isCredit = type.isCredit;
+    final l10n = AppLocalizations.of(context)!;
+    final isCredit = transaction.type.isCredit;
+    final color = isCredit ? AppColors.credit : AppColors.debit;
+
+    final description = transaction.description;
+    final hasDescription = description != null && description.trim().isNotEmpty;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isCredit
-              ? AppColors.credit.withOpacity(0.15)
-              : AppColors.debit.withOpacity(0.15),
-          child: Icon(
-            isCredit ? Icons.arrow_downward : Icons.arrow_upward,
-            color: isCredit ? AppColors.credit : AppColors.debit,
-          ),
-        ),
-        title: Text(
-          CurrencyFormatter.format(transaction.amount),
-          style: TextStyle(
-            color: isCredit ? AppColors.credit : AppColors.debit,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
           children: [
-            if (transaction.description != null &&
-                transaction.description!.isNotEmpty)
-              Text(
-                transaction.description!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
-            Text(
-              DateFormatter.relative(transaction.date),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              child: Icon(
+                isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
+                color: color,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    // Fall back to the type name when there is no note.
+                    hasDescription
+                        ? description
+                        : (isCredit ? l10n.credit : l10n.debit),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    DateFormatter.relative(
+                      transaction.date,
+                      todayLabel: l10n.today,
+                      yesterdayLabel: l10n.yesterday,
+                      localeCode: Localizations.localeOf(context).languageCode,
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Credit shows as +, debit as -, so direction is obvious at a glance.
+            MoneyText(
+              transaction.type.signedAmount(transaction.amount),
+              fontSize: 15,
+              color: color,
+              signed: true,
             ),
           ],
         ),
-        trailing: onDelete != null
-            ? IconButton(
-                icon: const Icon(Icons.delete, color: Colors.grey),
-                onPressed: onDelete,
-              )
-            : Chip(
-                label: Text(
-                  type.label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isCredit ? AppColors.credit : AppColors.debit,
-                  ),
-                ),
-                backgroundColor: isCredit
-                    ? AppColors.credit.withOpacity(0.1)
-                    : AppColors.debit.withOpacity(0.1),
-                side: BorderSide.none,
-              ),
       ),
     );
   }

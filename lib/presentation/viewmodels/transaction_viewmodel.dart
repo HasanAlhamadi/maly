@@ -1,5 +1,9 @@
 // 📁 lib/presentation/viewmodels/transaction_viewmodel.dart
+// PURPOSE: Transaction actions (writes). Reads live in the providers.
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/local/database/app_database.dart';
+import '../../domain/entities/transaction.dart';
 import '../providers/core_providers.dart';
 
 final transactionActionsProvider = Provider<TransactionActions>((ref) {
@@ -13,22 +17,27 @@ class TransactionActions {
   Future<void> addTransaction({
     required int personId,
     required double amount,
-    required int type,
+    required TransactionType type,
     String? description,
     DateTime? date,
-  }) async {
-    final repo = _ref.read(debtRepositoryProvider);
-    await repo.insertTransaction(
-      personId: personId,
-      amount: amount,
-      type: type,
-      description: description,
-      date: date,
-    );
+  }) {
+    return _ref
+        .read(debtRepositoryProvider)
+        .insertTransaction(
+          personId: personId,
+          amount: amount,
+          type: type,
+          description: description,
+          date: date,
+        );
   }
 
-  Future<void> deleteTransaction(int id) async {
-    final repo = _ref.read(debtRepositoryProvider);
-    await repo.deleteTransaction(id);
+  /// Deletes and hands back the removed row so the caller can offer an Undo.
+  Future<DebtTransaction?> deleteTransaction(int id) {
+    return _ref.read(debtRepositoryProvider).deleteTransaction(id);
+  }
+
+  Future<void> restoreTransaction(DebtTransaction transaction) {
+    return _ref.read(debtRepositoryProvider).restoreTransaction(transaction);
   }
 }

@@ -1,5 +1,10 @@
 // 📁 lib/services/notification_service.dart
-// PURPOSE: Local notifications setup
+// PURPOSE: Local notifications setup.
+//
+// Android 13+ and iOS both require the user to grant permission before any
+// notification can be shown, so init() asks for it.
+
+import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -12,9 +17,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
       android: androidSettings,
@@ -22,6 +25,24 @@ class NotificationService {
     );
 
     await _plugin.initialize(settings: initSettings);
+    await _requestPermission();
+  }
+
+  /// Without this, nothing is ever displayed on Android 13+ or iOS.
+  Future<void> _requestPermission() async {
+    if (Platform.isAndroid) {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+    } else if (Platform.isIOS) {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+    }
   }
 
   Future<void> showNotification({

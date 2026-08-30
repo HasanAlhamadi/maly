@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Android 13+ will not display any notification without this. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
-        android:label="maly"
+        android:label="Maly"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -1,5 +1,6 @@
-// 📁 lib/presentation/views/transaction/add_transaction_screen.dart
-// PURPOSE: Record a new debt entry against one person.
+// 📁 lib/presentation/views/transaction/transaction_form_screen.dart
+// PURPOSE: One form used for both adding and editing a transaction.
+// Passing a transactionId switches it into edit mode.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,26 +12,45 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../generated/app_localizations.dart';
 import '../../providers/person_providers.dart';
+import '../../providers/transaction_providers.dart';
 import '../../viewmodels/transaction_viewmodel.dart';
 
-class AddTransactionScreen extends ConsumerStatefulWidget {
+class TransactionFormScreen extends ConsumerStatefulWidget {
   final int personId;
 
-  const AddTransactionScreen({super.key, required this.personId});
+  /// Null means "create a new transaction".
+  final int? transactionId;
+
+  const TransactionFormScreen({
+    super.key,
+    required this.personId,
+    this.transactionId,
+  });
+
+  bool get isEditing => transactionId != null;
 
   @override
-  ConsumerState<AddTransactionScreen> createState() =>
-      _AddTransactionScreenState();
+  ConsumerState<TransactionFormScreen> createState() =>
+      _TransactionFormScreenState();
 }
 
-class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
+class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
 
   TransactionType _selectedType = TransactionType.credit;
   DateTime _selectedDate = DateTime.now();
+
+  /// Optional. When set, a reminder is scheduled for this day.
+  DateTime? _dueDate;
   bool _isSaving = false;
+
+  /// Stops the loaded transaction from overwriting what the user is typing.
+  bool _prefilled = false;
+
+  /// Kept so the reminder body can name the person without a lookup.
+  String? _personName;
 
   @override
   void dispose() {
@@ -54,26 +74,66 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     try {
       final description = _descCtrl.text.trim();
+      final actions = ref.read(transactionActionsProvider);
 
-      await ref
-          .read(transactionActionsProvider)
-          .addTransaction(
-            personId: widget.personId,
-            amount: amount,
-            type: _selectedType,
-            description: description.isEmpty ? null : description,
-            date: _selectedDate,
-          );
+      // Wording for the reminder is built here, where l10n is available.
+      final reminder = _dueDate == null
+          ? null
+          : ReminderText(
+              title: l10n.paymentDue,
+              body:
+                  '${_personName ?? ''} · '
+                          '${CurrencyFormatter.format(amount)}'
+                      .trim(),
+            );
+
+      if (widget.isEditing) {
+        await actions.updateTransaction(
+          id: widget.transactionId!,
+          amount: amount,
+          type: _selectedType,
+          description: description.isEmpty ? null : description,
+          date: _selectedDate,
+          dueDate: _dueDate,
+          reminder: reminder,
+        );
+      } else {
+        await actions.addTransaction(
+          personId: widget.personId,
+          amount: amount,
+          type: _selectedType,
+          description: description.isEmpty ? null : description,
+          date: _selectedDate,
+          dueDate: _dueDate,
+          reminder: reminder,
+        );
+      }
 
       if (router.canPop()) router.pop();
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.transactionAdded)),
+        SnackBar(
+          content: Text(
+            widget.isEditing ? l10n.transactionUpdated : l10n.transactionAdded,
+          ),
+        ),
       );
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  /// Due dates look forward, unlike the transaction date which looks back.
+  Future<void> _pickDueDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? now.add(const Duration(days: 7)),
+      firstDate: DateTime(now.year, now.month, now.day),
+      lastDate: DateTime(now.year + 5),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
   }
 
   Future<void> _pickDate() async {
@@ -90,7 +150,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final person = ref.watch(personByIdProvider(widget.personId)).valueOrNull;
+    _personName = person?.name;
     final localeCode = Localizations.localeOf(context).languageCode;
+
+    // In edit mode, fill the fields once the transaction has loaded. Only the
+    // copy into the controllers is done once, so it never overwrites typing.
+    if (widget.isEditing) {
+      final existing = ref
+          .watch(transactionByIdProvider(widget.transactionId!))
+          .valueOrNull;
+
+      if (existing != null && !_prefilled) {
+        _amountCtrl.text = CurrencyFormatter.formatPlain(existing.amount);
+        _descCtrl.text = existing.description ?? '';
+        _selectedType = existing.type;
+        _selectedDate = existing.date;
+        _dueDate = existing.dueDate;
+        _prefilled = true;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -98,12 +176,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l10n.addTransaction),
+            Text(widget.isEditing ? l10n.editTransaction : l10n.addTransaction),
             if (person != null)
-              Text(
-                person.name,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(person.name, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
@@ -113,7 +188,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           padding: const EdgeInsets.all(AppConstants.screenPadding),
           children: [
             // ===== Which direction does the money go? =====
-            Text(l10n.transactionType, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.transactionType,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -148,7 +226,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: 10),
             TextFormField(
               controller: _amountCtrl,
-              autofocus: true,
+              autofocus: !widget.isEditing,
               // The amount is the point of this screen, so make it big.
               style: const TextStyle(
                 fontSize: 26,
@@ -197,6 +275,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               label: l10n.date,
               value: DateFormatter.format(_selectedDate, localeCode),
               onTap: _pickDate,
+            ),
+
+            const SizedBox(height: 12),
+
+            // ===== Optional reminder =====
+            _DateField(
+              label: l10n.dueDate,
+              value: _dueDate == null
+                  ? l10n.noDueDate
+                  : DateFormatter.format(_dueDate!, localeCode),
+              icon: Icons.notifications_none_rounded,
+              onTap: _pickDueDate,
+              // Only offer "clear" once a date has actually been chosen.
+              onClear: _dueDate == null
+                  ? null
+                  : () => setState(() => _dueDate = null),
             ),
 
             const SizedBox(height: 28),
@@ -252,9 +346,7 @@ class _TypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: 0.10)
-              : theme.cardColor,
+          color: isSelected ? color.withValues(alpha: 0.10) : theme.cardColor,
           borderRadius: BorderRadius.circular(AppConstants.fieldRadius),
           border: Border.all(
             color: isSelected ? color : theme.dividerTheme.color!,
@@ -272,9 +364,7 @@ class _TypeCard extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isCredit
-                    ? Icons.south_west_rounded
-                    : Icons.north_east_rounded,
+                isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
                 color: isSelected ? color : idle,
                 size: 20,
               ),
@@ -306,11 +396,17 @@ class _DateField extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
+  final IconData icon;
+
+  /// Shows a clear button when provided.
+  final VoidCallback? onClear;
 
   const _DateField({
     required this.label,
     required this.value,
     required this.onTap,
+    this.icon = Icons.calendar_today_outlined,
+    this.onClear,
   });
 
   @override
@@ -329,22 +425,22 @@ class _DateField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 20,
-              color: theme.textTheme.bodySmall?.color,
-            ),
+            Icon(icon, size: 20, color: theme.textTheme.bodySmall?.color),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
-            Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(width: 4),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: theme.textTheme.bodySmall?.color,
-            ),
+            if (onClear != null)
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18),
+                visualDensity: VisualDensity.compact,
+                onPressed: onClear,
+              )
+            else
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.textTheme.bodySmall?.color,
+              ),
           ],
         ),
       ),

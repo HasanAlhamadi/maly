@@ -9,7 +9,8 @@ import '../../presentation/views/person/person_detail_screen.dart';
 import '../../presentation/views/person/person_form_screen.dart';
 import '../../presentation/views/person/person_list_screen.dart';
 import '../../presentation/views/settings/settings_screen.dart';
-import '../../presentation/views/transaction/add_transaction_screen.dart';
+import '../../presentation/views/stats/stats_screen.dart';
+import '../../presentation/views/transaction/transaction_form_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -25,6 +26,7 @@ final appRouter = GoRouter(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
     ),
+    GoRoute(path: '/stats', builder: (context, state) => const StatsScreen()),
     GoRoute(
       path: '/add-person',
       builder: (context, state) => const PersonFormScreen(),
@@ -50,7 +52,23 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final id = _idOrNull(state.pathParameters['personId']);
         if (id == null) return const _RouteErrorScreen();
-        return AddTransactionScreen(personId: id);
+        return TransactionFormScreen(personId: id);
+      },
+    ),
+    GoRoute(
+      // The person id travels in the URL too, so the form never has to look
+      // it up before it can render.
+      path: '/edit-transaction/:personId/:id',
+      builder: (context, state) {
+        final personId = _idOrNull(state.pathParameters['personId']);
+        final transactionId = _idOrNull(state.pathParameters['id']);
+        if (personId == null || transactionId == null) {
+          return const _RouteErrorScreen();
+        }
+        return TransactionFormScreen(
+          personId: personId,
+          transactionId: transactionId,
+        );
       },
     ),
   ],

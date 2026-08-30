@@ -33,5 +33,8 @@ class DebtTransactions extends Table {
 
   TextColumn get description => text().nullable().withLength(max: 500)();
   DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
+
+  // Optional: when this debt is expected to be paid. Drives the reminder.
+  DateTimeColumn get dueDate => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }

@@ -9,3 +9,11 @@ final personTransactionsStreamProvider =
           .watch(debtRepositoryProvider)
           .watchTransactionsForPerson(personId);
     });
+
+/// A single transaction, used to prefill the edit form.
+final transactionByIdProvider = StreamProvider.family<DebtTransaction?, int>((
+  ref,
+  id,
+) {
+  return ref.watch(debtRepositoryProvider).watchTransactionById(id);
+});

@@ -11,14 +11,25 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// Lets tests run against a throwaway in-memory database.
+  AppDatabase.forTesting(super.executor);
+
   /// Bump this whenever a table changes, and add an `onUpgrade` step below.
+  ///
+  /// v2 added `transactions.due_date`.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Existing rows keep their data; due_date simply starts out null.
+      if (from < 2) {
+        await m.addColumn(debtTransactions, debtTransactions.dueDate);
+      }
     },
     beforeOpen: (details) async {
       // SQLite disables foreign keys per connection by default, which would

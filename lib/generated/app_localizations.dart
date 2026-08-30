@@ -164,6 +164,18 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
   /// No description provided for @undo.
   ///
   /// In en, this message translates to:
@@ -481,6 +493,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You owe others'**
   String get youOweOthers;
+
+  /// No description provided for @backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get backup;
+
+  /// No description provided for @exportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export backup'**
+  String get exportData;
+
+  /// No description provided for @exportDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all your data to a file'**
+  String get exportDataSubtitle;
+
+  /// No description provided for @importData.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get importData;
+
+  /// No description provided for @importDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace your data from a file'**
+  String get importDataSubtitle;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get exportSuccess;
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored'**
+  String get importSuccess;
+
+  /// No description provided for @importWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup?'**
+  String get importWarningTitle;
+
+  /// No description provided for @importWarningMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This replaces every person and transaction currently in the app. It cannot be undone.'**
+  String get importWarningMessage;
+
+  /// No description provided for @invalidBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'That file is not a valid Maly backup'**
+  String get invalidBackupFile;
+
+  /// No description provided for @settleUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle up'**
+  String get settleUp;
+
+  /// No description provided for @settleUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle up?'**
+  String get settleUpTitle;
+
+  /// No description provided for @settleUpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This records a single entry that brings the balance to zero.'**
+  String get settleUpMessage;
+
+  /// No description provided for @settledPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled up'**
+  String get settledPayment;
+
+  /// No description provided for @balanceSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance settled'**
+  String get balanceSettled;
+
+  /// No description provided for @editTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Transaction'**
+  String get editTransaction;
+
+  /// No description provided for @transactionUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction updated'**
+  String get transactionUpdated;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get dueDate;
+
+  /// No description provided for @noDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get noDueDate;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @due.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get due;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// No description provided for @paymentDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due'**
+  String get paymentDue;
+
+  /// No description provided for @stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get stats;
+
+  /// No description provided for @monthlyActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly activity'**
+  String get monthlyActivity;
+
+  /// No description provided for @last6Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get last6Months;
+
+  /// No description provided for @topDebtors.
+  ///
+  /// In en, this message translates to:
+  /// **'Who owes you most'**
+  String get topDebtors;
+
+  /// No description provided for @noStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show yet'**
+  String get noStatsYet;
+
+  /// No description provided for @noStatsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few transactions to see your activity'**
+  String get noStatsYetSubtitle;
+
+  /// No description provided for @importFromContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from contacts'**
+  String get importFromContacts;
+
+  /// No description provided for @contactsPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts permission was not granted'**
+  String get contactsPermissionDenied;
 }
 
 class _AppLocalizationsDelegate

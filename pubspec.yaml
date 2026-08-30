@@ -26,11 +26,20 @@ dependencies:
   # Navigation
   go_router: ^17.0.0
 
-  # Local Notifications
+  # Local Notifications (payment reminders)
   flutter_local_notifications: ^20.1.0
+  # zonedSchedule needs a real timezone database and the device's zone name
+  timezone: ^0.10.0
+  flutter_timezone: ^5.1.0
 
   # Persist small settings (theme + language)
   shared_preferences: ^2.5.3
+
+  # Backup / restore: picks a save location and opens a backup file
+  file_picker: ^10.3.10
+
+  # Optional shortcut for filling in a person's name and phone
+  flutter_contacts: ^1.1.9+2
 
   # Utilities / UI
   intl: ^0.20.2

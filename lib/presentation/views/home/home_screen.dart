@@ -30,6 +30,11 @@ class HomeScreen extends ConsumerWidget {
         title: Text(l10n.appName),
         actions: [
           IconButton(
+            tooltip: l10n.stats,
+            icon: const Icon(Icons.insights_outlined),
+            onPressed: () => context.push('/stats'),
+          ),
+          IconButton(
             tooltip: l10n.settings,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),

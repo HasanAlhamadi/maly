@@ -423,6 +423,17 @@ class $DebtTransactionsTable extends DebtTransactions
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -443,6 +454,7 @@ class $DebtTransactionsTable extends DebtTransactions
     type,
     description,
     date,
+    dueDate,
     createdAt,
   ];
   @override
@@ -491,6 +503,12 @@ class $DebtTransactionsTable extends DebtTransactions
         date.isAcceptableOrUnknown(data['date']!, _dateMeta),
       );
     }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -532,6 +550,10 @@ class $DebtTransactionsTable extends DebtTransactions
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
       )!,
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -555,6 +577,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
   final TransactionType type;
   final String? description;
   final DateTime date;
+  final DateTime? dueDate;
   final DateTime createdAt;
   const DebtTransaction({
     required this.id,
@@ -563,6 +586,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
     required this.type,
     this.description,
     required this.date,
+    this.dueDate,
     required this.createdAt,
   });
   @override
@@ -580,6 +604,9 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
       map['description'] = Variable<String>(description);
     }
     map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -594,6 +621,9 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
           ? const Value.absent()
           : Value(description),
       date: Value(date),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
       createdAt: Value(createdAt),
     );
   }
@@ -612,6 +642,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
       ),
       description: serializer.fromJson<String?>(json['description']),
       date: serializer.fromJson<DateTime>(json['date']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -627,6 +658,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
       ),
       'description': serializer.toJson<String?>(description),
       'date': serializer.toJson<DateTime>(date),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -638,6 +670,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
     TransactionType? type,
     Value<String?> description = const Value.absent(),
     DateTime? date,
+    Value<DateTime?> dueDate = const Value.absent(),
     DateTime? createdAt,
   }) => DebtTransaction(
     id: id ?? this.id,
@@ -646,6 +679,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
     type: type ?? this.type,
     description: description.present ? description.value : this.description,
     date: date ?? this.date,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
     createdAt: createdAt ?? this.createdAt,
   );
   DebtTransaction copyWithCompanion(DebtTransactionsCompanion data) {
@@ -658,6 +692,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
           ? data.description.value
           : this.description,
       date: data.date.present ? data.date.value : this.date,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -671,14 +706,23 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
           ..write('type: $type, ')
           ..write('description: $description, ')
           ..write('date: $date, ')
+          ..write('dueDate: $dueDate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, personId, amount, type, description, date, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    personId,
+    amount,
+    type,
+    description,
+    date,
+    dueDate,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -689,6 +733,7 @@ class DebtTransaction extends DataClass implements Insertable<DebtTransaction> {
           other.type == this.type &&
           other.description == this.description &&
           other.date == this.date &&
+          other.dueDate == this.dueDate &&
           other.createdAt == this.createdAt);
 }
 
@@ -699,6 +744,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
   final Value<TransactionType> type;
   final Value<String?> description;
   final Value<DateTime> date;
+  final Value<DateTime?> dueDate;
   final Value<DateTime> createdAt;
   const DebtTransactionsCompanion({
     this.id = const Value.absent(),
@@ -707,6 +753,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     this.type = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
+    this.dueDate = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   DebtTransactionsCompanion.insert({
@@ -716,6 +763,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     this.type = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
+    this.dueDate = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : personId = Value(personId),
        amount = Value(amount);
@@ -726,6 +774,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     Expression<int>? type,
     Expression<String>? description,
     Expression<DateTime>? date,
+    Expression<DateTime>? dueDate,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -735,6 +784,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
       if (type != null) 'type': type,
       if (description != null) 'description': description,
       if (date != null) 'date': date,
+      if (dueDate != null) 'due_date': dueDate,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -746,6 +796,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     Value<TransactionType>? type,
     Value<String?>? description,
     Value<DateTime>? date,
+    Value<DateTime?>? dueDate,
     Value<DateTime>? createdAt,
   }) {
     return DebtTransactionsCompanion(
@@ -755,6 +806,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
       type: type ?? this.type,
       description: description ?? this.description,
       date: date ?? this.date,
+      dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -782,6 +834,9 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
     }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -797,6 +852,7 @@ class DebtTransactionsCompanion extends UpdateCompanion<DebtTransaction> {
           ..write('type: $type, ')
           ..write('description: $description, ')
           ..write('date: $date, ')
+          ..write('dueDate: $dueDate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1139,6 +1195,7 @@ typedef $$DebtTransactionsTableCreateCompanionBuilder =
       Value<TransactionType> type,
       Value<String?> description,
       Value<DateTime> date,
+      Value<DateTime?> dueDate,
       Value<DateTime> createdAt,
     });
 typedef $$DebtTransactionsTableUpdateCompanionBuilder =
@@ -1149,6 +1206,7 @@ typedef $$DebtTransactionsTableUpdateCompanionBuilder =
       Value<TransactionType> type,
       Value<String?> description,
       Value<DateTime> date,
+      Value<DateTime?> dueDate,
       Value<DateTime> createdAt,
     });
 
@@ -1216,6 +1274,11 @@ class $$DebtTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -1279,6 +1342,11 @@ class $$DebtTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1333,6 +1401,9 @@ class $$DebtTransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1397,6 +1468,7 @@ class $$DebtTransactionsTableTableManager
                 Value<TransactionType> type = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => DebtTransactionsCompanion(
                 id: id,
@@ -1405,6 +1477,7 @@ class $$DebtTransactionsTableTableManager
                 type: type,
                 description: description,
                 date: date,
+                dueDate: dueDate,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -1415,6 +1488,7 @@ class $$DebtTransactionsTableTableManager
                 Value<TransactionType> type = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => DebtTransactionsCompanion.insert(
                 id: id,
@@ -1423,6 +1497,7 @@ class $$DebtTransactionsTableTableManager
                 type: type,
                 description: description,
                 date: date,
+                dueDate: dueDate,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

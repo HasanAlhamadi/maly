@@ -42,6 +42,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
+  String get edit => 'Edit';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get undo => 'Undo';
 
   @override
@@ -200,4 +206,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youOweOthers => 'You owe others';
+
+  @override
+  String get backup => 'Backup';
+
+  @override
+  String get exportData => 'Export backup';
+
+  @override
+  String get exportDataSubtitle => 'Save all your data to a file';
+
+  @override
+  String get importData => 'Restore backup';
+
+  @override
+  String get importDataSubtitle => 'Replace your data from a file';
+
+  @override
+  String get exportSuccess => 'Backup saved';
+
+  @override
+  String get importSuccess => 'Backup restored';
+
+  @override
+  String get importWarningTitle => 'Restore backup?';
+
+  @override
+  String get importWarningMessage =>
+      'This replaces every person and transaction currently in the app. It cannot be undone.';
+
+  @override
+  String get invalidBackupFile => 'That file is not a valid Maly backup';
+
+  @override
+  String get settleUp => 'Settle up';
+
+  @override
+  String get settleUpTitle => 'Settle up?';
+
+  @override
+  String get settleUpMessage =>
+      'This records a single entry that brings the balance to zero.';
+
+  @override
+  String get settledPayment => 'Settled up';
+
+  @override
+  String get balanceSettled => 'Balance settled';
+
+  @override
+  String get editTransaction => 'Edit Transaction';
+
+  @override
+  String get transactionUpdated => 'Transaction updated';
+
+  @override
+  String get dueDate => 'Due date';
+
+  @override
+  String get noDueDate => 'No due date';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get due => 'Due';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get paymentDue => 'Payment due';
+
+  @override
+  String get stats => 'Statistics';
+
+  @override
+  String get monthlyActivity => 'Monthly activity';
+
+  @override
+  String get last6Months => 'Last 6 months';
+
+  @override
+  String get topDebtors => 'Who owes you most';
+
+  @override
+  String get noStatsYet => 'Nothing to show yet';
+
+  @override
+  String get noStatsYetSubtitle =>
+      'Add a few transactions to see your activity';
+
+  @override
+  String get importFromContacts => 'Pick from contacts';
+
+  @override
+  String get contactsPermissionDenied => 'Contacts permission was not granted';
 }

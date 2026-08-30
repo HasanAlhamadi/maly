@@ -7,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../generated/app_localizations.dart';
 import '../../providers/balance_providers.dart';
 import '../../providers/person_providers.dart';
@@ -16,6 +17,7 @@ import '../../viewmodels/transaction_viewmodel.dart';
 import '../../widgets/balance_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/money_text.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/transaction_tile.dart';
 
@@ -63,13 +65,31 @@ class PersonDetailScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   BalanceCard(balance: balance, title: l10n.balance),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      // Nothing to settle when the balance is already zero,
+                      // and the amount column rejects a zero insert.
+                      onPressed: balance == 0
+                          ? null
+                          : () => _confirmSettleUp(context, ref, l10n, balance),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.fieldRadius,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(Icons.handshake_outlined, size: 18),
+                      label: Text(l10n.settleUp),
+                    ),
+                  ),
                   // Contact details are only shown when they exist.
                   if (person?.phone != null && person!.phone!.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    _InfoRow(
-                      icon: Icons.phone_outlined,
-                      text: person.phone!,
-                    ),
+                    _InfoRow(icon: Icons.phone_outlined, text: person.phone!),
                   ],
                   if (person?.notes != null && person!.notes!.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -112,11 +132,26 @@ class PersonDetailScreen extends ConsumerWidget {
                       key: ValueKey(transaction.id),
                       endActionPane: ActionPane(
                         motion: const ScrollMotion(),
-                        extentRatio: 0.28,
+                        extentRatio: 0.5,
                         children: [
                           SlidableAction(
-                            onPressed: (_) =>
-                                _deleteTransaction(context, ref, transaction.id),
+                            onPressed: (_) => context.push(
+                              '/edit-transaction/$personId/${transaction.id}',
+                            ),
+                            backgroundColor: AppColors.settled,
+                            foregroundColor: Colors.white,
+                            icon: Icons.edit_outlined,
+                            label: l10n.edit,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.cardRadius,
+                            ),
+                          ),
+                          SlidableAction(
+                            onPressed: (_) => _deleteTransaction(
+                              context,
+                              ref,
+                              transaction.id,
+                            ),
                             backgroundColor: AppColors.debit,
                             foregroundColor: Colors.white,
                             icon: Icons.delete_outline_rounded,
@@ -127,7 +162,12 @@ class PersonDetailScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      child: TransactionTile(transaction: transaction),
+                      child: TransactionTile(
+                        transaction: transaction,
+                        onTap: () => context.push(
+                          '/edit-transaction/$personId/${transaction.id}',
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -171,10 +211,68 @@ class PersonDetailScreen extends ConsumerWidget {
           content: Text(l10n.transactionDeleted),
           action: SnackBarAction(
             label: l10n.undo,
-            onPressed: () => actions.restoreTransaction(deleted),
+            // Undo puts the reminder back as well as the row.
+            onPressed: () => actions.restoreTransaction(
+              deleted,
+              reminder: ReminderText(
+                title: l10n.paymentDue,
+                body: CurrencyFormatter.format(deleted.amount),
+              ),
+            ),
           ),
         ),
       );
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
+    }
+  }
+
+  /// Asks before writing the entry that zeroes the balance.
+  Future<void> _confirmSettleUp(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    double balance,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.settleUpTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.settleUpMessage),
+            const SizedBox(height: 12),
+            MoneyText(
+              balance.abs(),
+              fontSize: 22,
+              color: AppColors.forBalance(balance),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await ref
+          .read(transactionActionsProvider)
+          .settleUp(personId: personId, description: l10n.settledPayment);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.balanceSettled)));
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
     }

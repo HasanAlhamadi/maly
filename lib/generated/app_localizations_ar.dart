@@ -42,6 +42,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get delete => 'حذف';
 
   @override
+  String get edit => 'تعديل';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
   String get undo => 'تراجع';
 
   @override
@@ -199,4 +205,98 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get youOweOthers => 'عليك';
+
+  @override
+  String get backup => 'النسخ الاحتياطي';
+
+  @override
+  String get exportData => 'تصدير نسخة احتياطية';
+
+  @override
+  String get exportDataSubtitle => 'احفظ جميع بياناتك في ملف';
+
+  @override
+  String get importData => 'استعادة نسخة احتياطية';
+
+  @override
+  String get importDataSubtitle => 'استبدل بياناتك من ملف';
+
+  @override
+  String get exportSuccess => 'تم حفظ النسخة الاحتياطية';
+
+  @override
+  String get importSuccess => 'تمت استعادة النسخة الاحتياطية';
+
+  @override
+  String get importWarningTitle => 'استعادة النسخة الاحتياطية؟';
+
+  @override
+  String get importWarningMessage =>
+      'سيؤدي هذا إلى استبدال جميع الأشخاص والمعاملات الحالية. لا يمكن التراجع.';
+
+  @override
+  String get invalidBackupFile => 'هذا الملف ليس نسخة احتياطية صالحة';
+
+  @override
+  String get settleUp => 'تسوية الحساب';
+
+  @override
+  String get settleUpTitle => 'تسوية الحساب؟';
+
+  @override
+  String get settleUpMessage => 'سيتم تسجيل عملية واحدة تجعل الرصيد صفراً.';
+
+  @override
+  String get settledPayment => 'تسوية الحساب';
+
+  @override
+  String get balanceSettled => 'تمت تسوية الرصيد';
+
+  @override
+  String get editTransaction => 'تعديل المعاملة';
+
+  @override
+  String get transactionUpdated => 'تم تحديث المعاملة';
+
+  @override
+  String get dueDate => 'تاريخ الاستحقاق';
+
+  @override
+  String get noDueDate => 'بدون تاريخ استحقاق';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get due => 'يستحق';
+
+  @override
+  String get overdue => 'متأخر';
+
+  @override
+  String get paymentDue => 'دفعة مستحقة';
+
+  @override
+  String get stats => 'الإحصائيات';
+
+  @override
+  String get monthlyActivity => 'النشاط الشهري';
+
+  @override
+  String get last6Months => 'آخر 6 أشهر';
+
+  @override
+  String get topDebtors => 'الأكثر استحقاقاً لك';
+
+  @override
+  String get noStatsYet => 'لا يوجد ما يُعرض بعد';
+
+  @override
+  String get noStatsYetSubtitle => 'أضف بعض المعاملات لعرض نشاطك';
+
+  @override
+  String get importFromContacts => 'اختر من جهات الاتصال';
+
+  @override
+  String get contactsPermissionDenied => 'لم يتم منح إذن الوصول لجهات الاتصال';
 }

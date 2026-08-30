@@ -3,6 +3,7 @@
 // Passing a personId switches it into edit mode.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
@@ -39,6 +40,39 @@ class _PersonFormScreenState extends ConsumerState<PersonFormScreen> {
     _phoneCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
+  }
+
+  /// Fills the name and phone from a contact the user picks.
+  ///
+  /// This is only ever a shortcut — if permission is refused or nothing is
+  /// picked, the form stays exactly as it was and can still be typed into.
+  Future<void> _pickFromContacts() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final granted = await FlutterContacts.requestPermission(readonly: true);
+      if (!granted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.contactsPermissionDenied)),
+        );
+        return;
+      }
+
+      final contact = await FlutterContacts.openExternalPick();
+      if (contact == null) return;
+
+      setState(() {
+        if (contact.displayName.trim().isNotEmpty) {
+          _nameCtrl.text = contact.displayName.trim();
+        }
+        if (contact.phones.isNotEmpty) {
+          _phoneCtrl.text = contact.phones.first.number.trim();
+        }
+      });
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
+    }
   }
 
   /// Empty optional fields are stored as null rather than an empty string.
@@ -126,6 +160,11 @@ class _PersonFormScreenState extends ConsumerState<PersonFormScreen> {
               decoration: InputDecoration(
                 labelText: l10n.personName,
                 prefixIcon: const Icon(Icons.person_outline_rounded),
+                suffixIcon: IconButton(
+                  tooltip: l10n.importFromContacts,
+                  icon: const Icon(Icons.contacts_outlined),
+                  onPressed: _pickFromContacts,
+                ),
               ),
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.next,

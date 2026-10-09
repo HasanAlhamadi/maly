@@ -55,8 +55,23 @@ dev_dependencies:
   build_runner: ^2.15.1
   drift_dev: ^2.31.0
 
+  # App icon generation
+  flutter_launcher_icons: ^0.14.3
+
 flutter:
   uses-material-design: true
 
   # Enables gen-l10n code generation (configured in l10n.yaml)
   generate: true
+
+flutter_launcher_icons:
+  # Generate icons for both Android and iOS.
+  android: true
+  ios: true
+  # Path is relative to the project root.
+  image_path: "assets/logo.jpg"
+  # Adaptive icon for Android 8+ (foreground on white background).
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo.jpg"
+  # Remove the old icon on iOS if the name changed.
+  remove_alpha_ios: true

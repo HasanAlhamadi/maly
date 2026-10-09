@@ -1,0 +1,3 @@
+# Prevent Git LFS from tracking screenshots — use regular Git for these files
+screenshots/*.png -filter
+screenshots/*.jpg -filter
